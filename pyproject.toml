@@ -11,6 +11,8 @@ dependencies = [
     "matplotlib>=3.11.2",
     "numpy>=2.5.4",
     "pandas>=3.0.6",
+    "plotly>=7.1.0",
+    "pymesh>=1.0.2",
     "scikit-learn>=1.9.1",
 ]
 
