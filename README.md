@@ -10,6 +10,9 @@ Figure 1- Point cloud reconstruction method presented by Beetz et al.
 
 Typical cine MRI has 25 frames per cardiac cycle. UK Biobank has 50 frames. We provide 10 frames per sample to show the heart at 10 points in the cardiac cycle. Each 3D image has a resolution of $1.8\times1.8\times8$ mm.
 
+Shape: [10, 18000, 4]
+the fourth column in the final dimension corresponds to which heart surface it belongs to: LV endocardium, LV epicardium, RV endocardium
+
 The point clouds also have associated demographic characteristics in `mixed_demographics`, such as age, sex, and biomarkers, including systolic blood pressure (BP). You can find more about these variables on the UK Biobank website ⬇️
 
 : Help
