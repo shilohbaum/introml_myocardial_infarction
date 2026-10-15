@@ -24,7 +24,6 @@ class CardiacDataLoader:
             Path(samples_dir).expanduser() if samples_dir is not None
             else self.data_dir / ("mixed_samples" if training else "test_samples")
         )
-
     def __len__(self) -> int:
         return len(self.demographics)
 
