@@ -13,6 +13,7 @@ dependencies = [
     "pandas>=3.0.6",
     "plotly>=7.1.0",
     "pymesh>=1.0.2",
+    "catboost>=1.2.8",
     "scikit-learn>=1.9.1",
 ]
 
