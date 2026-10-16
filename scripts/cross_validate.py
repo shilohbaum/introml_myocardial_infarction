@@ -6,7 +6,7 @@ from src.models.model import create_model
 from src.training.trainer import train_model, evaluate_model
 
 
-def cross_validate(X, y, n_splits=5, n_spatial_features=540000):
+def cross_validate(X, y, n_splits=5, n_spatial_features=540000, model_func=create_model):
     cv = StratifiedKFold(
         n_splits=n_splits,
         shuffle=True,
@@ -21,7 +21,7 @@ def cross_validate(X, y, n_splits=5, n_spatial_features=540000):
         y_train = y.iloc[train_idx] if hasattr(y, "iloc") else y[train_idx]
         y_val = y.iloc[val_idx] if hasattr(y, "iloc") else y[val_idx]
 
-        model = create_model(n_spatial_features=n_spatial_features)
+        model = model_func(n_spatial_features=n_spatial_features)
 
         model = train_model(model, X_train, y_train)
         metrics = evaluate_model(model, X_val, y_val)
@@ -32,7 +32,7 @@ def cross_validate(X, y, n_splits=5, n_spatial_features=540000):
 
     print("\nCross-validation results:")
 
-    for metric in results[0]:
+    for metric in ["accuracy", "precision", "recall", "f1", "auc", "aupr"]:
         values = [result[metric] for result in results]
 
         print(

@@ -1,4 +1,6 @@
 # Byte-compiled / optimized / DLL files
+catboost_info/
+*.joblib
 *.DS_Store
 Data/
 data/
