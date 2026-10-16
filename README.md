@@ -68,3 +68,29 @@ See `notebooks/pca.ipynb` for PCA of the first-frame coordinates, explained
 variance, and 3D shape modes. With one frame per heart, these modes describe
 variation between hearts. Anatomical interpretation assumes corresponding
 points in a shared coordinate system across samples.
+
+## Best geometric model: RBF score + demographics
+
+The strongest model found so far uses heart geometry and patient demographics:
+
+```bash
+uv run python -m introml_myocardial_infarction.rbf_demographic_catboost \
+  --output results/mi-rbf-demographics-catboost-stack-cv42
+```
+
+Each heart starts as 10 frames of 18,000 XYZ points, with a surface label for
+each point. We replace those raw coordinates with 702 summaries: for each of
+the three surfaces and each frame, we measure its position relative to the
+whole-heart centre, its spread and its covariance eigenvalues. We also summarize
+how far points move from frame 0 and between successive frames. This keeps
+coarse shape and movement patterns without feeding all 540,000 coordinates to
+the classifier.
+
+An RBF SVM turns those summaries into a probability of MI. For training
+patients, that probability is cross-fitted: each patient's score comes from a
+model that did not train on that patient's label. CatBoost then combines this
+score with seven numeric demographics (age, BMI, height, weight, blood
+pressures and sex). Nested five-fold cross-validation selects settings and
+thresholds using training data only. The resulting mean F1 was **0.909 ± 0.022**.
+The full-training OOF score is used for selection and is optimistic; it is not
+the independent CV estimate. Held-out test scores are excluded because the
