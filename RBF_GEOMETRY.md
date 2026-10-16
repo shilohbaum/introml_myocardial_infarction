@@ -1,8 +1,23 @@
 # Geometric RBF classifier
 
-The RBF workflow uses handcrafted cardiac geometry and motion summaries,
-followed by a calibrated RBF SVM. It does not use the autoencoder or the broad
-multi-model comparison scripts.
+The best-performing workflow combines handcrafted cardiac geometry and motion
+summaries, a calibrated RBF SVM probability, and seven demographic features
+in a CatBoost stack. The RBF probability is cross-fitted for each training
+patient before CatBoost sees it, which avoids training the meta-model on
+in-sample base-model scores. The autoencoder and broad multi-model comparison
+scripts are not required.
+
+Run the nested stacking evaluation from the repository root:
+
+```bash
+uv run python -m introml_myocardial_infarction.rbf_demographic_catboost \
+  --output results/mi-rbf-demographics-catboost-stack-cv42
+```
+
+Its five-fold nested CV F1 is **0.909 ± 0.022** (seed 42). Each outer fold
+selects the RBF settings, CatBoost configuration, and classification threshold
+using only that fold's training partition. The full-training OOF score is a
+selection score and is optimistic.
 
 Run the focused nested-CV refinement from the repository root:
 
@@ -19,10 +34,6 @@ features, calibrates SVM probabilities, and selects its decision threshold
 inside training folds. `inter_surface_cv.py` contains an optional
 order-independent nearest-surface-distance feature extraction experiment.
 
-The saved refinement run reports nested five-fold F1 of 0.881 ± 0.017
-(seed 42). This is the estimate for that 702-feature model and its candidate
-search; other RBF feature variants in the broader experiment matrix scored
-differently. The full-training OOF score in `cv_summary.json` is a selection
-score and should not be treated as an independent estimate. Test-set scores
-are omitted here because the cloud-to-CSV pairing is not independently
-verified.
+The standalone RBF refinement is a useful geometry-only comparator; its saved
+run reports nested five-fold F1 of 0.881 ± 0.017. Test-set scores are omitted
+because the cloud-to-CSV pairing is not independently verified.
