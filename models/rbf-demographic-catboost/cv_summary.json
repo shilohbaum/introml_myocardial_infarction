@@ -1,0 +1,29 @@
+{
+  "representation": "cross-fitted RBF geometric probability + seven numeric demographics",
+  "base_rbf_selected_within_outer_training": true,
+  "n_samples": 897,
+  "n_meta_features": 8,
+  "demographic_features": [
+    "demographic_age",
+    "demographic_BMI",
+    "demographic_height",
+    "demographic_weight",
+    "demographic_diastolic_BP",
+    "demographic_systolic_BP",
+    "demographic_sex"
+  ],
+  "candidate_count": 4,
+  "n_splits": 5,
+  "seed": 42,
+  "nested_mean_f1": 0.9060315380050825,
+  "nested_sd_f1": 0.017522609815966317,
+  "nested_mean_f1_at_0_5": 0.9094076051848423,
+  "nested_mean_auroc": 0.9674038008045498,
+  "final_base_rbf_c": 30.0,
+  "final_base_rbf_gamma": 0.002,
+  "final_base_rbf_selection_f1": 0.8989473684210526,
+  "selected_model": "catboost_depth2_iterations250",
+  "selected_threshold": 0.5575198183893966,
+  "selected_oof_f1": 0.9144144144144144,
+  "note": "Outer folds evaluate stacking. Full-training OOF selection score is optimistic."
+}

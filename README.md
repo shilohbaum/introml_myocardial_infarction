@@ -79,12 +79,20 @@ uv run python -m introml_myocardial_infarction.rbf_demographic_catboost \
 ```
 
 Each heart starts as 10 frames of 18,000 XYZ points, with a surface label for
-each point. We replace those raw coordinates with 702 summaries: for each of
-the three surfaces and each frame, we measure its position relative to the
-whole-heart centre, its spread and its covariance eigenvalues. We also summarize
-how far points move from frame 0 and between successive frames. This keeps
-coarse shape and movement patterns without feeding all 540,000 coordinates to
-the classifier.
+each point. `geometry_features.py` converts that cloud into 702 numbers. For
+each of the three surfaces (LV endocardium, LV epicardium, and RV) and each
+frame, it subtracts that frame's whole-heart centre, then records the surface's
+3D centroid, spread along each coordinate axis, three covariance eigenvalues,
+and centroid change relative to frame 0. These are 12 shape and position values
+per frame, or 120 per surface.
+
+For movement, it measures each point's distance from its frame-0 position in
+each frame, and the distance moved since the previous frame for each of the
+nine transitions. For each set of distances it stores the 10th, 50th, and 90th
+percentiles, mean, standard deviation, and maximum. That gives 10×6 + 9×6 =
+114 motion values per surface. With 120 shape and position values, each surface
+contributes 234 values; all three surfaces give 702 features. This summarizes
+shape and movement without passing all 540,000 XYZ coordinates to the classifier.
 
 An RBF SVM turns those summaries into a probability of MI. For training
 patients, that probability is cross-fitted: each patient's score comes from a
@@ -94,3 +102,11 @@ pressures and sex). Nested five-fold cross-validation selects settings and
 thresholds using training data only. The resulting mean F1 was **0.909 ± 0.022**.
 The full-training OOF score is used for selection and is optimistic; it is not
 the independent CV estimate. Held-out test scores are excluded because the
+mapping from test CSV rows to point-cloud files has not been verified.
+
+The fitted training-only model is shared at
+`models/rbf-demographic-catboost/model.joblib`. It contains the RBF SVM,
+CatBoost model, selected classification threshold, and training sample IDs.
+Its five-fold CV summary is in the same directory as `cv_summary.json`. The
+checkpoint was fitted on the 897 retained training patients and does not use
+the potentially mismatched test point clouds.
