@@ -91,16 +91,60 @@ def describe_cloud(cloud, robust_motion=False):
     return result
 
 
-def feature_matrix(loader, robust_motion=False):
+def feature_matrix(data, robust_motion=False):
     rows = []
-    for index, sample_id in enumerate(loader.demographics.index):
-        rows.append(describe_cloud(loader.load_point_cloud(sample_id, mmap_mode="r"),
-                                   robust_motion=robust_motion))
-        if (index + 1) % 100 == 0 or index + 1 == len(loader):
-            print(f"Extracted geometric summaries for {index + 1}/{len(loader)} patients", flush=True)
+
+    for index, (_, row) in enumerate(data.iterrows()):
+        xyz = np.asarray(row["point_cloud"])
+        surface_codes = np.asarray(row["surface_codes"])
+
+        # Expected xyz: (frames, points, 3)
+        if xyz.ndim != 3 or xyz.shape[-1] != 3:
+            raise ValueError(f"Invalid point cloud shape: {xyz.shape}")
+
+        # Handle surface codes stored per point or per frame
+        if surface_codes.ndim == 1:
+            surface_codes = np.broadcast_to(
+                surface_codes[None, :],
+                xyz.shape[:2],
+            )
+
+        if surface_codes.shape != xyz.shape[:2]:
+            raise ValueError(
+                f"Surface codes shape {surface_codes.shape} "
+                f"does not match {xyz.shape[:2]}"
+            )
+
+        # Combine XYZ coordinates and surface codes
+        cloud = np.concatenate(
+            [xyz, surface_codes[..., None]],
+            axis=-1,
+        )
+
+        rows.append(
+            describe_cloud(
+                cloud,
+                robust_motion=robust_motion,
+            )
+        )
+
+        if (index + 1) % 100 == 0 or index + 1 == len(data):
+            print(
+                f"Extracted geometric summaries for "
+                f"{index + 1}/{len(data)} patients",
+                flush=True,
+            )
+
     matrix = np.stack(rows)
-    columns = [f"geometry_{i:04d}" for i in range(matrix.shape[1])]
-    return pd.DataFrame(matrix, columns=columns)
+
+    return pd.DataFrame(
+        matrix,
+        index=data.index,
+        columns=[
+            f"geometry_{i:04d}"
+            for i in range(matrix.shape[1])
+        ],
+    )
 
 
 def candidates():

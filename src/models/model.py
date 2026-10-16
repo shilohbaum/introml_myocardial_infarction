@@ -120,3 +120,18 @@ def create_catboost(
             thread_count=-1,
         )),
     ])
+
+
+from .rbf_catboost import RBFCatBoostClassifier
+
+
+def create_rbf_catboost(
+    n_geometry_features,
+    seed=42,
+    threads=2,
+):
+    return RBFCatBoostClassifier(
+        n_geometry_features=n_geometry_features,
+        seed=seed,
+        threads=threads,
+    )
